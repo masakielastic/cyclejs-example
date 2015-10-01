@@ -1,17 +1,22 @@
 import Cycle from '@cycle/core';
-import CycleDOM from '@cycle/dom';
+import {h, makeDOMDriver} from '@cycle/dom';
 
-function main() {
-  return {
-    DOM: Cycle.Rx.Observable.interval(1000)
-      .map(i => CycleDOM.h(
-        'h1', '' + i + ' seconds elapsed'
-      ))
+function main(responses) {
+  const requests = {
+    DOM: responses.DOM.select('.field').events('input')
+      .map(ev => ev.target.value)
+      .startWith('')
+      .map(name =>
+        h('div', [
+          h('label', 'Name:'),
+          h('input.field', {attributes: {type: 'text'}}),
+          h('h1', 'Hello ' + name)
+        ])
+      )
   };
+  return requests;
 }
 
-let drivers = {
-  DOM: CycleDOM.makeDOMDriver('#app')
-};
-
-Cycle.run(main, drivers);
+Cycle.run(main, {
+  DOM: makeDOMDriver('#app-container')
+});
